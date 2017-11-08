@@ -1,12 +1,9 @@
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-//
+
 public class GUI {
     private JPanel panel1;
     private JTextField outputTF;
@@ -19,7 +16,9 @@ public class GUI {
     private JTable operatorStackList;
     private JButton restartB;
 
-    public GUI(){
+    private String initial;
+
+    GUI(){
         JFrame frame=new JFrame();
         frame.setContentPane(panel1);
         frame.setVisible(true);
@@ -42,7 +41,6 @@ public class GUI {
         Queue<Character> output= new LinkedList<>();
         Stack<Character> operatorStack = new Stack<>();
 
-
         stepButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -51,7 +49,7 @@ public class GUI {
                         while (!operatorStack.isEmpty()) {//while there are tokens at the top of the stack
                             char runTokenStack = operatorStack.pop();
                             ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
-                            if (runTokenStack != '(' | runTokenStack != ')')//if they are different than parenthesis
+                            if (runTokenStack != '(' && runTokenStack != ')')//if they are different than parenthesis
                             {
                                 output.add(runTokenStack);//pop the operator and enqueue it
                                 outputTF.setText("");
@@ -62,9 +60,15 @@ public class GUI {
                                 throw new ParenthesisNotPairedException("Missing parenthesis");
                             }
                         }
+                        JOptionPane.showMessageDialog(null,"Terminado");
+                        evaluateButton.setEnabled(true);
                     }catch (ParenthesisNotPairedException ex){
                         JOptionPane.showMessageDialog(null, ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                     }
+                    completeButton.setEnabled(false);
+                    stepButton.setEnabled(false);
+                    inputTF.setText(initial);
+                    inputTF.setEditable(true);
                 }else {
                     inputTF.setText(inputTF.getText().substring(1));
                     try {
@@ -86,7 +90,7 @@ public class GUI {
                     while (!operatorStack.isEmpty()) {//while there are tokens at the top of the stack
                         char runTokenStack = operatorStack.pop();
                         ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
-                        if (runTokenStack != '(' | runTokenStack != ')')//if they are different than parenthesis
+                        if (runTokenStack != '(' && runTokenStack != ')')//if they are different than parenthesis
                         {
                             output.add(runTokenStack);//pop the operator and enqueue it
                             outputTF.setText("");
@@ -95,24 +99,32 @@ public class GUI {
                             }
                         } else {
                             throw new ParenthesisNotPairedException("Missing parenthesis");
-
                         }
                     }
+                    JOptionPane.showMessageDialog(null,"Terminado");
+                    evaluateButton.setEnabled(true);
                 }catch (ParenthesisNotPairedException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                     clear(input, output,operatorStack);
                 }
+                completeButton.setEnabled(false);
+                stepButton.setEnabled(false);
+                inputTF.setEditable(true);
+                inputTF.setText(initial);
             }
         });
         restartB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //clear(input,output,operatorStack);
+                clear(input,output,operatorStack);
                 for (char it:inputTF.getText().toCharArray()) {
                     input.add(it);
                 }
+                inputTF.setEditable(false);
+                initial=inputTF.getText();
                 completeButton.setEnabled(true);
                 stepButton.setEnabled(true);
+                evaluateButton.setEnabled(false);
             }
         });
     }
@@ -128,13 +140,13 @@ public class GUI {
         while(!operatorStack.isEmpty()){
             operatorStack.pop();
         }
-        int rows=((DefaultTableModel) operatorStackList.getModel()).getRowCount();
+        int rows=operatorStackList.getModel().getRowCount();
         for (int i = 0; i < rows; i++) {
             ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
         }
     }
 
-    public void Algorithm(char token, Queue<Character> output, Stack<Character> operatorStack) throws ParenthesisNotPairedException {
+    private void Algorithm(char token, Queue<Character> output, Stack<Character> operatorStack) throws ParenthesisNotPairedException {
         if(Character.isDigit(token)){//If token is a number
             output.add(token);//enqueue it
             outputTF.setText("");
@@ -143,7 +155,6 @@ public class GUI {
             }
         }
         else if(token == '^' || token == '*' || token == '/' || token == '+' || token == '-') {//If token is an operator o1
-            boolean flag = false;
             if (!operatorStack.isEmpty() && operatorStack.peek() != '(') {//This excludes the open parenthesis
                 while (!operatorStack.isEmpty() && (token != '^' && Operator.precedence(token, operatorStack.peek()) <= 0) || (token == '^' && Operator.precedence(token, operatorStack.peek()) < 0)) {//while there is a operator in the top of the stack and o1 is left associative and its precedence is less o equal than o2 or o1 is right associative and its precedence is less than o2
                     output.add(operatorStack.pop());//pop o2 from the stack and enqueue it
@@ -155,10 +166,10 @@ public class GUI {
                 }
             }
             operatorStack.push(token);
-            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{"1",String.valueOf(token)});
+            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token)),String.valueOf(token)});
         }else if (token == '('){//if token is an open parenthesis
             operatorStack.push(token);// push it in the top of the stack
-            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{"1",String.valueOf(token)});
+            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token)),String.valueOf(token)});
         }else if (token == ')'){//if token is an close parenthesis
             char runTokenStack;
             //try catch if there is a parenthesis without its partner
@@ -176,33 +187,6 @@ public class GUI {
             }
             ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
         }
-
         //If there are no more tokens to read
-    }
-
-
-
-    public class Complete implements ActionListener{
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Queue<Character> input = new LinkedList<>();
-            Queue<Character> output= new LinkedList<>();
-            for (char charat:inputTF.getText().toCharArray()) {
-                input.add(charat);
-            }
-
-            Stack<Character> operatorStack = new Stack<>();
-
-            String res = "";
-            for(char chare : output)
-            {
-                res += chare;
-            }
-            outputTF.setText(res);
-
-            inputTF.setText("");
-
-        }
     }
 }

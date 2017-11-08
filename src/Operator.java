@@ -1,13 +1,24 @@
-public  class Operator
+class Operator
 {
+    static int myprecedence(char a){
+        switch (a){
+            case '^':
+                return 4;
+            case '*':
+            case '/':
+                return 3;
+            case '+':
+            case '-':
+                return 2;
+        }
+        return -10;
+    }
     /**
      * Compares one operator over another
      *
-     * @return if b=a, 0
-     * @return if b>a, 1
-     * @return if a>b, -1
+     * @return if b=a, 0; if b>a, 1; if a>b, -1
      * */
-    public static int precedence(char a, char b)
+    static int precedence(char a, char b)
     {
         switch (a)
         {
