@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Shunting Yard:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts</output-path>
+    <root id="archive" name="Shunting Yard.jar">
+      <element id="module-output" name="Shunting Yard" />
+    </root>
+  </artifact>
+</component>

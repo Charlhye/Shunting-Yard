@@ -38,24 +38,6 @@ public class GUI {
 
         operatorStackList.setModel(model);
 
-
-
-        inputTF.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) {
-
-            }
-            public void removeUpdate(DocumentEvent e) {
-
-            }
-            public void insertUpdate(DocumentEvent e) {
-                warn();
-            }
-
-            public void warn() {
-
-            }
-        });
-
         Queue<Character> input = new LinkedList<>();
         Queue<Character> output= new LinkedList<>();
         Stack<Character> operatorStack = new Stack<>();
@@ -115,7 +97,6 @@ public class GUI {
                             throw new ParenthesisNotPairedException("Missing parenthesis");
 
                         }
-                        //Holiwis
                     }
                 }catch (ParenthesisNotPairedException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
