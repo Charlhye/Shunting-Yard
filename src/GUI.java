@@ -6,7 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-
+//
 public class GUI {
     private JPanel panel1;
     private JTextField outputTF;
