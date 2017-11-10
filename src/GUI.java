@@ -127,6 +127,35 @@ public class GUI {
                 evaluateButton.setEnabled(false);
             }
         });
+        evaluateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Queue <Character> toeval=new LinkedList<>();
+                Stack <Integer> numStack=new Stack<>();
+
+                for (char it:outputTF.getText().toCharArray()) {
+                    toeval.add(it);
+                }
+                while (!toeval.isEmpty()){
+                    char token=toeval.remove();
+                    if(token == '+'){
+                        numStack.push(numStack.pop()+numStack.pop());
+                    }else if(token == '-'){
+                        numStack.push(numStack.pop()-numStack.pop());
+                    }else if(token == '*') {
+                        numStack.push(numStack.pop()*numStack.pop());
+                    }else if(token == '/'){
+                        numStack.push(numStack.pop()/numStack.pop());
+                    }else if(token == '^'){
+                        int a=numStack.pop();
+                        numStack.push((int)Math.pow(numStack.pop(),a));
+                    }else {
+                        numStack.push(Integer.parseInt(String.valueOf(token)));
+                    }
+                }
+                evalTF.setText(String.valueOf(numStack.pop()));
+            }
+        });
     }
 
     private void clear(Queue<Character> input, Queue<Character> output, Stack<Character> operatorStack ){
