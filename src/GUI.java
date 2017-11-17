@@ -23,7 +23,7 @@ public class GUI {
         frame.setContentPane(panel1);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(650,600);
+        frame.setSize(1000,700);
 
         inputTF.setBorder(BorderFactory.createTitledBorder("Input"));
         outputTF.setBorder(BorderFactory.createTitledBorder("Output"));
@@ -37,8 +37,8 @@ public class GUI {
 
         operatorStackList.setModel(model);
 
-        Queue<Character> input = new LinkedList<>();
-        Queue<Character> output= new LinkedList<>();
+        Queue<String> input = new LinkedList<>();
+        Queue<String> output= new LinkedList<>();
         Stack<Character> operatorStack = new Stack<>();
 
         stepButton.addActionListener(new ActionListener() {
@@ -51,10 +51,10 @@ public class GUI {
                             ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
                             if (runTokenStack != '(' && runTokenStack != ')')//if they are different than parenthesis
                             {
-                                output.add(runTokenStack);//pop the operator and enqueue it
+                                output.add(String.valueOf(runTokenStack));//pop the operator and enqueue it
                                 outputTF.setText("");
-                                for (char car : output) {
-                                    outputTF.setText(outputTF.getText() + car);
+                                for (String car : output) {
+                                    outputTF.setText(outputTF.getText()+ " " + car);
                                 }
                             } else {
                                 throw new ParenthesisNotPairedException("Missing parenthesis");
@@ -70,7 +70,10 @@ public class GUI {
                     inputTF.setText(initial);
                     inputTF.setEditable(true);
                 }else {
-                    inputTF.setText(inputTF.getText().substring(1));
+                    if(inputTF.getText().length()==input.peek().length())
+                        inputTF.setText(inputTF.getText().substring(input.peek().length()));
+                    else
+                        inputTF.setText(inputTF.getText().substring(input.peek().length()+1));
                     try {
                         Algorithm(input.remove(), output, operatorStack);
                         System.out.print("");
@@ -84,7 +87,7 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    for (char it : input) {
+                    for (String it : input) {
                         Algorithm(it, output, operatorStack);
                     }
                     while (!operatorStack.isEmpty()) {//while there are tokens at the top of the stack
@@ -92,10 +95,10 @@ public class GUI {
                         ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
                         if (runTokenStack != '(' && runTokenStack != ')')//if they are different than parenthesis
                         {
-                            output.add(runTokenStack);//pop the operator and enqueue it
+                            output.add(String.valueOf(runTokenStack));//pop the operator and enqueue it
                             outputTF.setText("");
-                            for (char car : output) {
-                                outputTF.setText(outputTF.getText() + car);
+                            for (String car : output) {
+                                outputTF.setText(outputTF.getText()+ " " + car);
                             }
                         } else {
                             throw new ParenthesisNotPairedException("Missing parenthesis");
@@ -117,7 +120,8 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clear(input,output,operatorStack);
-                for (char it:inputTF.getText().toCharArray()) {
+                inputTF.setText(spaces(inputTF.getText()));
+                for (String it:inputTF.getText().split(" ")) {
                     input.add(it);
                 }
                 inputTF.setEditable(false);
@@ -130,23 +134,24 @@ public class GUI {
         evaluateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Queue <Character> toeval=new LinkedList<>();
+                Queue <String> toeval=new LinkedList<>();
                 Stack <Integer> numStack=new Stack<>();
 
-                for (char it:outputTF.getText().toCharArray()) {
-                    toeval.add(it);
+                for (String it:outputTF.getText().split(" ")) {
+                    if (!it.equals(""))
+                        toeval.add(it);
                 }
                 while (!toeval.isEmpty()){
-                    char token=toeval.remove();
-                    if(token == '+'){
+                    String token=toeval.remove();
+                    if(token.charAt(0) == '+'){
                         numStack.push(numStack.pop()+numStack.pop());
-                    }else if(token == '-'){
+                    }else if(token.charAt(0) == '-'){
                         numStack.push(numStack.pop()-numStack.pop());
-                    }else if(token == '*') {
+                    }else if(token.charAt(0) == '*') {
                         numStack.push(numStack.pop()*numStack.pop());
-                    }else if(token == '/'){
+                    }else if(token.charAt(0) == '/'){
                         numStack.push(numStack.pop()/numStack.pop());
-                    }else if(token == '^'){
+                    }else if(token.charAt(0) == '^'){
                         int a=numStack.pop();
                         numStack.push((int)Math.pow(numStack.pop(),a));
                     }else {
@@ -158,7 +163,7 @@ public class GUI {
         });
     }
 
-    private void clear(Queue<Character> input, Queue<Character> output, Stack<Character> operatorStack ){
+    private void clear(Queue<String> input, Queue<String> output, Stack<Character> operatorStack ){
         while(!input.isEmpty()){
             input.remove();
         }
@@ -175,40 +180,40 @@ public class GUI {
         }
     }
 
-    private void Algorithm(char token, Queue<Character> output, Stack<Character> operatorStack) throws ParenthesisNotPairedException {
-        if(Character.isDigit(token)){//If token is a number
+    private void Algorithm(String token, Queue<String> output, Stack<Character> operatorStack) throws ParenthesisNotPairedException {
+        if(isNumeric(token)){//If token is a number
             output.add(token);//enqueue it
             outputTF.setText("");
-            for (char car:output) {
-                outputTF.setText(outputTF.getText()+car);
+            for (String car:output) {
+                outputTF.setText(outputTF.getText()+" "+car);
             }
         }
-        else if(token == '^' || token == '*' || token == '/' || token == '+' || token == '-') {//If token is an operator o1
+        else if(token.equals("^") || token.equals("*") || token.equals("/") || token.equals("+") || token.equals("-")) {//If token is an operator o1
             if (!operatorStack.isEmpty() && operatorStack.peek() != '(') {//This excludes the open parenthesis
-                while (!operatorStack.isEmpty() && (token != '^' && Operator.precedence(token, operatorStack.peek()) <= 0) || (token == '^' && Operator.precedence(token, operatorStack.peek()) < 0)) {//while there is a operator in the top of the stack and o1 is left associative and its precedence is less o equal than o2 or o1 is right associative and its precedence is less than o2
-                    output.add(operatorStack.pop());//pop o2 from the stack and enqueue it
+                while (!operatorStack.isEmpty() && (!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) <= 0) || (!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) < 0)) {//while there is a operator in the top of the stack and o1 is left associative and its precedence is less o equal than o2 or o1 is right associative and its precedence is less than o2
+                    output.add(String.valueOf(operatorStack.pop()));//pop o2 from the stack and enqueue it
                     ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
                     outputTF.setText("");
-                    for (char car:output) {
-                        outputTF.setText(outputTF.getText()+car);
+                    for (String car:output) {
+                        outputTF.setText(outputTF.getText()+" "+car);
                     }
                 }
             }
-            operatorStack.push(token);
-            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token)),String.valueOf(token)});
-        }else if (token == '('){//if token is an open parenthesis
-            operatorStack.push(token);// push it in the top of the stack
-            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token)),String.valueOf(token)});
-        }else if (token == ')'){//if token is an close parenthesis
+            operatorStack.push(token.toCharArray()[0]);
+            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token.charAt(0))),String.valueOf(token)});
+        }else if (token.equals("(")){//if token is an open parenthesis
+            operatorStack.push(token.toCharArray()[0]);// push it in the top of the stack
+            ((DefaultTableModel) operatorStackList.getModel()).insertRow(0,new String[]{String.valueOf(Operator.myprecedence(token.charAt(0))),String.valueOf(token)});
+        }else if (token.equals(")")){//if token is an close parenthesis
             char runTokenStack;
             //try catch if there is a parenthesis without its partner
             try {
                 while ((runTokenStack = operatorStack.pop()) != '(') {//Until the top of the stack is an open parenthesis
                     ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
-                    output.add(runTokenStack);//pop operands from the stack and enqueue them
+                    output.add(String.valueOf(runTokenStack));//pop operands from the stack and enqueue them
                     outputTF.setText("");
-                    for (char car : output) {
-                        outputTF.setText(outputTF.getText() + car);
+                    for (String car : output) {
+                        outputTF.setText(outputTF.getText()+" " + car);
                     }
                 }
             }catch (EmptyStackException ex){
@@ -217,5 +222,48 @@ public class GUI {
             ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
         }
         //If there are no more tokens to read
+    }
+
+    public String spaces(String toEval){
+        Queue <String> in=new LinkedList<>();
+        for (char it:toEval.toCharArray()) {
+            in.add(String.valueOf(it));
+        }
+        Stack <String> out=new Stack<>();
+        while (!in.isEmpty()){
+            String token=in.remove();
+            if(token.equals("^") || token.equals("*") || token.equals("/") || token.equals("+") || token.equals("-")){
+                out.push(token);
+            }else{
+                if(!out.isEmpty()){
+                    if (out.peek().equals("^") || out.peek().equals("*") || out.peek().equals("/") || out.peek().equals("+") || out.peek().equals("-")){
+                        out.push(token);
+                    }else{
+                        out.push(out.pop()+token);
+                    }
+                }else {
+                    out.push(token);
+                }
+            }
+        }
+        String res="";
+        while (!out.isEmpty()){
+            if(out.size()!=1){
+                res=" "+out.pop()+res;
+            }else {
+                res=out.pop()+res;
+            }
+        }
+        return res;
+    }
+
+    public boolean isNumeric(String str){
+        try{
+            double d = Double.parseDouble(str);
+        }
+        catch(NumberFormatException nfe){
+            return false;
+        }
+        return true;
     }
 }
