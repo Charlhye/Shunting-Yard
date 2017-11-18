@@ -150,7 +150,8 @@ public class GUI {
                     }else if(token.charAt(0) == '*') {
                         numStack.push(numStack.pop()*numStack.pop());
                     }else if(token.charAt(0) == '/'){
-                        numStack.push(numStack.pop()/numStack.pop());
+                        int a=numStack.pop();
+                        numStack.push(numStack.pop()/a);
                     }else if(token.charAt(0) == '^'){
                         int a=numStack.pop();
                         numStack.push((int)Math.pow(numStack.pop(),a));
@@ -232,14 +233,18 @@ public class GUI {
         Stack <String> out=new Stack<>();
         while (!in.isEmpty()){
             String token=in.remove();
-            if(token.equals("^") || token.equals("*") || token.equals("/") || token.equals("+") || token.equals("-")){
+            if(token.equals("^") || token.equals("*") || token.equals("/") || token.equals("+") || token.equals("-") || token.equals("(") || token.equals(")")){
                 out.push(token);
             }else{
                 if(!out.isEmpty()){
-                    if (out.peek().equals("^") || out.peek().equals("*") || out.peek().equals("/") || out.peek().equals("+") || out.peek().equals("-")){
+                    if (out.peek().equals("^") || out.peek().equals("*") || out.peek().equals("/") || out.peek().equals("+") || out.peek().equals("-")|| token.equals("(") || token.equals(")")){
                         out.push(token);
                     }else{
-                        out.push(out.pop()+token);
+                        if(out.peek().equals(("("))){
+                            out.push(token);
+                        }else {
+                            out.push(out.pop() + token);
+                        }
                     }
                 }else {
                     out.push(token);
