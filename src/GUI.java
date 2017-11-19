@@ -120,12 +120,12 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clear(input,output,operatorStack);
+                initial=inputTF.getText();
                 inputTF.setText(spaces(inputTF.getText()));
                 for (String it:inputTF.getText().split(" ")) {
-                    input.add(it);
-                }
+                    input.add(it);                }
                 inputTF.setEditable(false);
-                initial=inputTF.getText();
+
                 completeButton.setEnabled(true);
                 stepButton.setEnabled(true);
                 evaluateButton.setEnabled(false);
@@ -191,7 +191,10 @@ public class GUI {
         }
         else if(token.equals("^") || token.equals("*") || token.equals("/") || token.equals("+") || token.equals("-")) {//If token is an operator o1
             if (!operatorStack.isEmpty() && operatorStack.peek() != '(') {//This excludes the open parenthesis
-                while (!operatorStack.isEmpty() && (!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) <= 0) || (!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) < 0)) {//while there is a operator in the top of the stack and o1 is left associative and its precedence is less o equal than o2 or o1 is right associative and its precedence is less than o2
+                while ((!operatorStack.isEmpty()) && ((!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) <= 0) || (!token.equals("^") && Operator.precedence(token.charAt(0), operatorStack.peek()) < 0))) {//while there is a operator in the top of the stack and o1 is left associative and its precedence is less o equal than o2 or o1 is right associative and its precedence is less than o2
+                    if(operatorStack.peek() == '(') {
+                        break;
+                    }
                     output.add(String.valueOf(operatorStack.pop()));//pop o2 from the stack and enqueue it
                     ((DefaultTableModel) operatorStackList.getModel()).removeRow(0);
                     outputTF.setText("");
